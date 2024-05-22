@@ -3,12 +3,27 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tesseract_annotator/types/filetree_node.dart';
 
-class FilesProviderNotifier extends Notifier<List<FileTreeNode>> {
+class FilesProviderNotifier extends Notifier<FileTreeNode> {
   @override
-  List<FileTreeNode> build() {
-    const path = "/media/moritz/Shared/Entwicklung/bodi-fahrzeugscheine/tesseract";
-    return FileTreeNode(path: path, isDir: File(path).statSync().type == FileSystemEntityType.directory).children;
+  FileTreeNode build() {
+    const path = "/home/moritz";
+    final rootNode = FileTreeNode(
+        path: path,
+        isDir: File(path).statSync().type == FileSystemEntityType.directory);
+    rootNode.loadChildren();
+    rootNode.loadChildrensChildren();
+    return rootNode;
+  }
+
+  void selectDirectory(String path) {
+    final rootNode = FileTreeNode(
+        path: path,
+        isDir: File(path).statSync().type == FileSystemEntityType.directory);
+    rootNode.loadChildren();
+    rootNode.loadChildrensChildren();
+    state = rootNode;
   }
 }
 
-final filesProvider = NotifierProvider<FilesProviderNotifier, List<FileTreeNode>>(FilesProviderNotifier.new);
+final filesProvider = NotifierProvider<FilesProviderNotifier, FileTreeNode>(
+    FilesProviderNotifier.new);

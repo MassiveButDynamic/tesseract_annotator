@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tesseract_annotator/components/file_view.dart';
 import 'package:tesseract_annotator/components/filetree.dart';
+import 'package:tesseract_annotator/components/inspector_sidebar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,10 +33,19 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       body: ResizableContainer(
-          divider: const ResizableDivider(color: Colors.white, size: 10, thickness: 10),
-          controller: ResizableController(data: const [ResizableChildData(minSize: 100, startingRatio: 0.2), ResizableChildData()]),
+          divider: const ResizableDivider(
+              color: Colors.white, size: 10, thickness: 10),
+          controller: ResizableController(data: const [
+            ResizableChildData(minSize: 100, startingRatio: 0.2),
+            ResizableChildData(),
+            ResizableChildData(startingRatio: 0.2)
+          ]),
           direction: Axis.horizontal,
-          children: [const Filetree(), Container()]),
+          children: [
+            const Filetree(),
+            Container(margin: const EdgeInsets.only(), child: const FileView()),
+            const InspectorSidebar()
+          ]),
     );
   }
 }

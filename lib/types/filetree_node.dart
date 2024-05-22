@@ -6,21 +6,31 @@ class FileTreeNode {
   final FileTreeNode? parent;
   final String path;
   final bool isDir;
-  List<FileTreeNode> children = [];
+  List<FileTreeNode>? _children;
 
-  FileTreeNode({required this.path, required this.isDir, this.parent}) {
-    children = _loadChildren();
+  List<FileTreeNode> get children {
+    return _children ?? [];
   }
+
+  FileTreeNode({required this.path, required this.isDir, this.parent});
 
   String getFilename() {
     return basename(path);
   }
 
-  List<FileTreeNode> _loadChildren() {
+  List<FileTreeNode> loadChildren() {
+    if (_children != null) {
+      return _children!;
+    }
+
     if (File(path).statSync().type == FileSystemEntityType.directory) {
       final children = Directory(path)
           .listSync()
-          .map((e) => FileTreeNode(path: e.path, isDir: File(e.path).statSync().type == FileSystemEntityType.directory, parent: this))
+          .map((e) => FileTreeNode(
+              path: e.path,
+              isDir: File(e.path).statSync().type ==
+                  FileSystemEntityType.directory,
+              parent: this))
           .toList();
       children.sort((a, b) {
         if (a.isDir && !b.isDir) return -1;
@@ -30,6 +40,14 @@ class FileTreeNode {
       return children;
     } else {
       return [];
+    }
+  }
+
+  void loadChildrensChildren() {
+    _children ??= loadChildren();
+
+    for (var n in _children!) {
+      n.loadChildren();
     }
   }
 }
