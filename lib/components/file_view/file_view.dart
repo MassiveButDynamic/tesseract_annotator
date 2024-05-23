@@ -26,6 +26,7 @@ class _FileViewState extends ConsumerState<FileView> {
   ImageInfo? currentImageInfo;
   double zoomScale = 1.0;
   final TransformationController transformationController = TransformationController();
+  Key stackKey = UniqueKey();
 
   _setSelectedBoxIndex(int? index) {
     ref.read(selectedBoxProvider.notifier).update(
@@ -46,6 +47,7 @@ class _FileViewState extends ConsumerState<FileView> {
           })));
 
       currentImagePath = selectedFile?.path ?? "";
+      stackKey = UniqueKey();
     }
 
     return GestureDetector(
@@ -61,7 +63,7 @@ class _FileViewState extends ConsumerState<FileView> {
                 child: Center(
                     child: Container(
                         margin: const EdgeInsets.all(20),
-                        child: Stack(key: UniqueKey(), children: [
+                        child: Stack(key: stackKey, children: [
                           image,
                           ...selectedFile.boxes
                               .mapIndexed((i, b) => _FileViewBoxSelectedInfo(
