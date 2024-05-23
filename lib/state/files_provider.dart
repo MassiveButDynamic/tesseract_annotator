@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tesseract_annotator/state/file_provider.dart';
-import 'package:tesseract_annotator/state/only_show_compatible_files_provider.dart';
 import 'package:tesseract_annotator/state/selected_directory_provider.dart';
 import 'package:tesseract_annotator/types/filetree_node.dart';
 

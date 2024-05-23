@@ -74,6 +74,7 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
   }
 
   void selectFile(String path) {
+    ref.read(selectedBoxProvider.notifier).update((_) => null);
     state = SelectedFile(path: path);
   }
 
