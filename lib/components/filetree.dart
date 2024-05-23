@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
 import 'package:tesseract_annotator/state/file_provider.dart';
 import 'package:tesseract_annotator/state/files_provider.dart';
+import 'package:tesseract_annotator/state/only_show_compatible_files_provider.dart';
 import 'package:tesseract_annotator/state/selected_directory_provider.dart';
 import 'package:tesseract_annotator/types/filetree_node.dart';
 
@@ -21,10 +22,6 @@ class _FiletreeState extends ConsumerState<Filetree> {
   TreeController<FileTreeNode>? treeController;
   String currentRootPath = "";
 
-  bool _pathIsCompatibleFile(String path) {
-    return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png") || path.endsWith("tif");
-  }
-
   @override
   void initState() {
     super.initState();
@@ -36,9 +33,9 @@ class _FiletreeState extends ConsumerState<Filetree> {
 
     if (files != null && (treeController == null || files.path != currentRootPath || onlyShowCompatibleFilesChanged)) {
       treeController = TreeController(
-          roots: onlyShowCompatibleFiles ? files.children.where((c) => c.isDir || _pathIsCompatibleFile(c.path)).toList() : files.children,
+          roots: onlyShowCompatibleFiles ? files.children.where((c) => c.isDir || c.pathIsCompatibleFile()).toList() : files.children,
           childrenProvider: (FileTreeNode node) =>
-              onlyShowCompatibleFiles ? node.children.where((c) => c.isDir || _pathIsCompatibleFile(c.path)).toList() : node.children,
+              onlyShowCompatibleFiles ? node.children.where((c) => c.isDir || c.pathIsCompatibleFile()).toList() : node.children,
           parentProvider: (node) => node.parent,
           defaultExpansionState: false);
       currentRootPath = files.path;
@@ -73,6 +70,7 @@ class _FiletreeState extends ConsumerState<Filetree> {
                       value: onlyShowCompatibleFiles,
                       onChanged: (value) => setState(() {
                             onlyShowCompatibleFiles = value ?? false;
+                            ref.read(onlyShowCompatibleFilesProvider.notifier).update((_) => value ?? false);
                             onlyShowCompatibleFilesChanged = true;
                           })),
                   const Text("Nur kompatible Dateien"),
@@ -101,7 +99,7 @@ class _FiletreeState extends ConsumerState<Filetree> {
                                       if (entry.node.isDir) {
                                         treeController!.toggleExpansion(entry.node);
                                         entry.node.loadChildrensChildren();
-                                      } else if (_pathIsCompatibleFile(entry.node.path)) {
+                                      } else if (entry.node.pathIsCompatibleFile()) {
                                         ref.read(fileProvider.notifier).selectFile(entry.node.path);
                                       }
                                     },

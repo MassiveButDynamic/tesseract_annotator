@@ -47,9 +47,7 @@ class SelectedFile {
   }
 
   Future<void> _saveBoxes() async {
-    await File("${withoutExtension(path)}.box").writeAsString(_boxes
-        .map((b) => "${b.letter} ${b.x} ${b.y} ${b.w} ${b.h} 0")
-        .join("\n"));
+    await File("${withoutExtension(path)}.box").writeAsString(_boxes.map((b) => "${b.letter} ${b.x} ${b.y} ${b.w} ${b.h} 0").join("\n"));
   }
 
   Future<TessBox> addBox({int? x, int? y}) async {
@@ -62,6 +60,10 @@ class SelectedFile {
   Future<void> deleteBox(int index) async {
     _boxes.removeAt(index);
     await _saveBoxes();
+  }
+
+  bool pathIsCompatibleFile() {
+    return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
   }
 }
 
@@ -86,9 +88,7 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
 
   void addBox({int? x, int? y}) async {
     await state?.addBox(x: x, y: y);
-    ref
-        .read(selectedBoxProvider.notifier)
-        .update((_) => state != null ? state!.boxes.length - 1 : null);
+    ref.read(selectedBoxProvider.notifier).update((_) => state != null ? state!.boxes.length - 1 : null);
     ref.notifyListeners();
   }
 
@@ -103,5 +103,4 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
   }
 }
 
-final fileProvider = NotifierProvider<FileProviderNotifier, SelectedFile?>(
-    FileProviderNotifier.new);
+final fileProvider = NotifierProvider<FileProviderNotifier, SelectedFile?>(FileProviderNotifier.new);

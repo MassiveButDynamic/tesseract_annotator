@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tesseract_annotator/state/file_provider.dart';
+import 'package:tesseract_annotator/state/files_provider.dart';
 import 'package:tesseract_annotator/state/selected_box_provider.dart';
 
 class InspectorSidebar extends ConsumerStatefulWidget {
@@ -36,6 +37,14 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
     ref.read(fileProvider.notifier).deleteBox(ref.read(selectedBoxProvider));
   }
 
+  _back() {
+    ref.read(filesProvider.notifier).back();
+  }
+
+  _next() {
+    ref.read(filesProvider.notifier).next();
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedFile = ref.watch(fileProvider);
@@ -53,6 +62,21 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+              margin: const EdgeInsets.only(bottom: 15),
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                TextButton.icon(
+                  onPressed: () => _back(),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text("Zurück"),
+                ),
+                TextButton.icon(
+                  onPressed: () => _next(),
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text("Weiter"),
+                  iconAlignment: IconAlignment.end,
+                )
+              ])),
           Row(children: [
             Expanded(
                 child: Container(

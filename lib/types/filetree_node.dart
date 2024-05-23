@@ -26,11 +26,7 @@ class FileTreeNode {
     if (File(path).statSync().type == FileSystemEntityType.directory) {
       final children = Directory(path)
           .listSync()
-          .map((e) => FileTreeNode(
-              path: e.path,
-              isDir: File(e.path).statSync().type ==
-                  FileSystemEntityType.directory,
-              parent: this))
+          .map((e) => FileTreeNode(path: e.path, isDir: File(e.path).statSync().type == FileSystemEntityType.directory, parent: this))
           .toList();
       children.sort((a, b) {
         if (a.isDir && !b.isDir) return -1;
@@ -49,5 +45,9 @@ class FileTreeNode {
     for (var n in _children!) {
       n.loadChildren();
     }
+  }
+
+  bool pathIsCompatibleFile() {
+    return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
   }
 }

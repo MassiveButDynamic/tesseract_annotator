@@ -37,7 +37,7 @@ class _FileViewState extends ConsumerState<FileView> {
   Widget build(BuildContext context) {
     final selectedFile = ref.watch(fileProvider);
     final selectedBoxIndex = ref.watch(selectedBoxProvider);
-    final image = selectedFile != null ? Image.file(File(selectedFile.path)) : null;
+    final image = selectedFile != null && selectedFile.pathIsCompatibleFile() ? Image.file(File(selectedFile.path)) : null;
 
     if (selectedFile?.path != currentImagePath) {
       currentImageInfo = null;
@@ -51,7 +51,9 @@ class _FileViewState extends ConsumerState<FileView> {
     return GestureDetector(
         onTap: () => _setSelectedBoxIndex(null),
         child: selectedFile == null || image == null || currentImageInfo == null
-            ? const Text("-")
+            ? (selectedFile?.pathIsCompatibleFile() == true
+                ? const Center(child: Text("Datei kann nicht geladen werden"))
+                : const Center(child: Text("Dateityp wird nicht unterstützt")))
             : InteractiveViewer(
                 maxScale: 5,
                 onInteractionUpdate: (details) => setState(() => zoomScale = transformationController.value.getMaxScaleOnAxis()),
