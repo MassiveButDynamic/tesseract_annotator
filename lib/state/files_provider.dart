@@ -6,7 +6,7 @@ import 'package:tesseract_annotator/types/filetree_node.dart';
 class FilesProviderNotifier extends Notifier<FileTreeNode> {
   @override
   FileTreeNode build() {
-    const path = "/home/moritz";
+    const path = "/home/moritz/Entwicklung/bodi/fahrzeugscheine/boxes";
     final rootNode = FileTreeNode(
         path: path,
         isDir: File(path).statSync().type == FileSystemEntityType.directory);

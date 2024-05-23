@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tesseract_annotator/components/file_view.dart';
+import 'package:tesseract_annotator/components/file_view/file_view.dart';
 import 'package:tesseract_annotator/components/filetree.dart';
 import 'package:tesseract_annotator/components/inspector_sidebar.dart';
 
@@ -43,8 +43,8 @@ class MyHomePage extends StatelessWidget {
           direction: Axis.horizontal,
           children: [
             const Filetree(),
-            Container(margin: const EdgeInsets.only(), child: const FileView()),
-            const InspectorSidebar()
+            const FileView(),
+            Ink(color: Colors.white, child: const InspectorSidebar())
           ]),
     );
   }
