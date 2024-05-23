@@ -51,7 +51,7 @@ class SelectedFile {
   }
 
   Future<TessBox> addBox({int? x, int? y}) async {
-    final box = TessBox(x: x ?? 0, y: y ?? 0, w: 50, h: 50, letter: "A");
+    final box = TessBox(x: x ?? 0, y: y ?? 0, w: 20, h: 20, letter: "A");
     _boxes.add(box);
     await _saveBoxes();
     return box;
