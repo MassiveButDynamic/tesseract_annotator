@@ -9,8 +9,7 @@ class InspectorSidebar extends ConsumerStatefulWidget {
   const InspectorSidebar({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _InspectorSidebarState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _InspectorSidebarState();
 }
 
 class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
@@ -23,12 +22,10 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
         );
   }
 
-  _updateBox(int selectedBoxIndex, SelectedFile selectedFile,
-      {int? x, y, w, h, String? letter}) {
-    ref.read(fileProvider.notifier).updateBox(
-        selectedBoxIndex,
-        selectedFile.boxes[selectedBoxIndex]
-            .copyWith(x: x, y: y, w: w, h: h, letter: letter));
+  _updateBox(int selectedBoxIndex, SelectedFile selectedFile, {int? x, y, w, h, String? letter}) {
+    ref
+        .read(fileProvider.notifier)
+        .updateBox(selectedBoxIndex, selectedFile.boxes[selectedBoxIndex].copyWith(x: x, y: y, w: w, h: h, letter: letter));
   }
 
   _addBox() {
@@ -44,21 +41,11 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
     final selectedFile = ref.watch(fileProvider);
     final selectedBoxIndex = ref.watch(selectedBoxProvider);
 
-    x = selectedFile != null && selectedBoxIndex != null
-        ? selectedFile.boxes[selectedBoxIndex].x
-        : null;
-    y = selectedFile != null && selectedBoxIndex != null
-        ? selectedFile.boxes[selectedBoxIndex].y
-        : null;
-    w = selectedFile != null && selectedBoxIndex != null
-        ? selectedFile.boxes[selectedBoxIndex].w
-        : null;
-    h = selectedFile != null && selectedBoxIndex != null
-        ? selectedFile.boxes[selectedBoxIndex].h
-        : null;
-    letter = selectedFile != null && selectedBoxIndex != null
-        ? selectedFile.boxes[selectedBoxIndex].letter
-        : null;
+    x = selectedFile != null && selectedBoxIndex != null ? selectedFile.boxes[selectedBoxIndex].x : null;
+    y = selectedFile != null && selectedBoxIndex != null ? selectedFile.boxes[selectedBoxIndex].y : null;
+    w = selectedFile != null && selectedBoxIndex != null ? selectedFile.boxes[selectedBoxIndex].w : null;
+    h = selectedFile != null && selectedBoxIndex != null ? selectedFile.boxes[selectedBoxIndex].h : null;
+    letter = selectedFile != null && selectedBoxIndex != null ? selectedFile.boxes[selectedBoxIndex].letter : null;
 
     return SingleChildScrollView(
         child: Container(
@@ -71,7 +58,7 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                 child: Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     child: FilledButton.icon(
-                        onPressed: () => _addBox(),
+                        onPressed: selectedFile == null ? null : () => _addBox(),
                         icon: const Icon(Icons.add),
                         label: const Text("Neue Box"))))
           ]),
@@ -85,19 +72,11 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                           children: [
                             Expanded(
                                 child: TextField(
-                              controller: TextEditingController(
-                                  text: selectedFile
-                                      .boxes[selectedBoxIndex].letter),
-                              decoration: const InputDecoration(
-                                  label: Text("Zeichen"),
-                                  border: OutlineInputBorder()),
+                              controller: TextEditingController(text: selectedFile.boxes[selectedBoxIndex].letter),
+                              decoration: const InputDecoration(label: Text("Zeichen"), border: OutlineInputBorder()),
                               onChanged: (value) => letter = value,
-                              onEditingComplete: () => _updateBox(
-                                  selectedBoxIndex, selectedFile,
-                                  letter: letter),
-                              onTapOutside: (event) => _updateBox(
-                                  selectedBoxIndex, selectedFile,
-                                  letter: letter),
+                              onEditingComplete: () => _updateBox(selectedBoxIndex, selectedFile, letter: letter),
+                              onTapOutside: (event) => _updateBox(selectedBoxIndex, selectedFile, letter: letter),
                             ))
                           ],
                         ),
@@ -108,53 +87,29 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                                   child: Container(
                                       margin: const EdgeInsets.only(right: 10),
                                       child: TextField(
-                                        controller: TextEditingController(
-                                            text: selectedFile
-                                                .boxes[selectedBoxIndex].x
-                                                .toString()),
+                                        controller: TextEditingController(text: selectedFile.boxes[selectedBoxIndex].x.toString()),
                                         inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
+                                          FilteringTextInputFormatter.digitsOnly,
                                         ],
-                                        keyboardType: const TextInputType
-                                            .numberWithOptions(),
-                                        decoration: const InputDecoration(
-                                            label: Text("X"),
-                                            border: OutlineInputBorder()),
-                                        onChanged: (value) =>
-                                            x = int.tryParse(value) ?? x,
-                                        onEditingComplete: () => _updateBox(
-                                            selectedBoxIndex, selectedFile,
-                                            x: x),
-                                        onTapOutside: (event) => _updateBox(
-                                            selectedBoxIndex, selectedFile,
-                                            x: x),
+                                        keyboardType: const TextInputType.numberWithOptions(),
+                                        decoration: const InputDecoration(label: Text("X"), border: OutlineInputBorder()),
+                                        onChanged: (value) => x = int.tryParse(value) ?? x,
+                                        onEditingComplete: () => _updateBox(selectedBoxIndex, selectedFile, x: x),
+                                        onTapOutside: (event) => _updateBox(selectedBoxIndex, selectedFile, x: x),
                                       ))),
                               Expanded(
                                   child: Container(
                                       margin: const EdgeInsets.only(right: 10),
                                       child: TextField(
-                                        controller: TextEditingController(
-                                            text: selectedFile
-                                                .boxes[selectedBoxIndex].y
-                                                .toString()),
+                                        controller: TextEditingController(text: selectedFile.boxes[selectedBoxIndex].y.toString()),
                                         inputFormatters: [
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
+                                          FilteringTextInputFormatter.digitsOnly,
                                         ],
-                                        keyboardType: const TextInputType
-                                            .numberWithOptions(),
-                                        decoration: const InputDecoration(
-                                            label: Text("Y"),
-                                            border: OutlineInputBorder()),
-                                        onChanged: (value) =>
-                                            y = int.tryParse(value) ?? y,
-                                        onEditingComplete: () => _updateBox(
-                                            selectedBoxIndex, selectedFile,
-                                            y: y),
-                                        onTapOutside: (event) => _updateBox(
-                                            selectedBoxIndex, selectedFile,
-                                            y: y),
+                                        keyboardType: const TextInputType.numberWithOptions(),
+                                        decoration: const InputDecoration(label: Text("Y"), border: OutlineInputBorder()),
+                                        onChanged: (value) => y = int.tryParse(value) ?? y,
+                                        onEditingComplete: () => _updateBox(selectedBoxIndex, selectedFile, y: y),
+                                        onTapOutside: (event) => _updateBox(selectedBoxIndex, selectedFile, y: y),
                                       ))),
                             ])),
                         Row(
@@ -163,51 +118,29 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                                 child: Container(
                                     margin: const EdgeInsets.only(right: 10),
                                     child: TextField(
-                                      controller: TextEditingController(
-                                          text: selectedFile
-                                              .boxes[selectedBoxIndex].w
-                                              .toString()),
+                                      controller: TextEditingController(text: selectedFile.boxes[selectedBoxIndex].w.toString()),
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly,
                                       ],
-                                      keyboardType: const TextInputType
-                                          .numberWithOptions(),
-                                      decoration: const InputDecoration(
-                                          label: Text("Breite"),
-                                          border: OutlineInputBorder()),
-                                      onChanged: (value) =>
-                                          w = int.tryParse(value) ?? w,
-                                      onEditingComplete: () => _updateBox(
-                                          selectedBoxIndex, selectedFile,
-                                          w: w),
-                                      onTapOutside: (event) => _updateBox(
-                                          selectedBoxIndex, selectedFile,
-                                          w: w),
+                                      keyboardType: const TextInputType.numberWithOptions(),
+                                      decoration: const InputDecoration(label: Text("Breite"), border: OutlineInputBorder()),
+                                      onChanged: (value) => w = int.tryParse(value) ?? w,
+                                      onEditingComplete: () => _updateBox(selectedBoxIndex, selectedFile, w: w),
+                                      onTapOutside: (event) => _updateBox(selectedBoxIndex, selectedFile, w: w),
                                     ))),
                             Expanded(
                                 child: Container(
                                     margin: const EdgeInsets.only(right: 10),
                                     child: TextField(
-                                      controller: TextEditingController(
-                                          text: selectedFile
-                                              .boxes[selectedBoxIndex].h
-                                              .toString()),
+                                      controller: TextEditingController(text: selectedFile.boxes[selectedBoxIndex].h.toString()),
                                       inputFormatters: [
                                         FilteringTextInputFormatter.digitsOnly,
                                       ],
-                                      keyboardType: const TextInputType
-                                          .numberWithOptions(),
-                                      decoration: const InputDecoration(
-                                          label: Text("Höhe"),
-                                          border: OutlineInputBorder()),
-                                      onChanged: (value) =>
-                                          h = int.tryParse(value) ?? h,
-                                      onEditingComplete: () => _updateBox(
-                                          selectedBoxIndex, selectedFile,
-                                          h: h),
-                                      onTapOutside: (event) => _updateBox(
-                                          selectedBoxIndex, selectedFile,
-                                          h: h),
+                                      keyboardType: const TextInputType.numberWithOptions(),
+                                      decoration: const InputDecoration(label: Text("Höhe"), border: OutlineInputBorder()),
+                                      onChanged: (value) => h = int.tryParse(value) ?? h,
+                                      onEditingComplete: () => _updateBox(selectedBoxIndex, selectedFile, h: h),
+                                      onTapOutside: (event) => _updateBox(selectedBoxIndex, selectedFile, h: h),
                                     )))
                           ],
                         ),
@@ -220,12 +153,7 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                                       onPressed: () => _deleteBox(),
                                       label: const Text("Box löschen"),
                                       icon: const Icon(Icons.delete),
-                                      style: ButtonStyle(
-                                          foregroundColor:
-                                              WidgetStatePropertyAll(
-                                                  Theme.of(context)
-                                                      .colorScheme
-                                                      .error)),
+                                      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(Theme.of(context).colorScheme.error)),
                                     )))
                           ],
                         )
@@ -237,8 +165,7 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                   .mapIndexed((i, b) => ListTile(
                         onTap: () => _setSelectedBoxIndex(i),
                         selected: selectedBoxIndex == i,
-                        selectedTileColor:
-                            Theme.of(context).colorScheme.primaryContainer,
+                        selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
                         isThreeLine: true,
                         title: Row(
                           children: [const Text("Zeichen: "), Text(b.letter)],
@@ -252,12 +179,7 @@ class _InspectorSidebarState extends ConsumerState<InspectorSidebar> {
                               Text(b.y.toString()),
                             ]),
                             Row(
-                              children: [
-                                const Text("Breite: "),
-                                Text(b.w.toString()),
-                                const Text(", Höhe: "),
-                                Text(b.h.toString())
-                              ],
+                              children: [const Text("Breite: "), Text(b.w.toString()), const Text(", Höhe: "), Text(b.h.toString())],
                             )
                           ],
                         ),

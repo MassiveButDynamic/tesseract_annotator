@@ -7,6 +7,13 @@ import 'package:tesseract_annotator/state/file_provider.dart';
 import 'package:collection/collection.dart';
 import 'package:tesseract_annotator/state/selected_box_provider.dart';
 
+class _FileViewBoxSelectedInfo {
+  final FileViewBox box;
+  final bool selected;
+
+  const _FileViewBoxSelectedInfo(this.box, this.selected);
+}
+
 class FileView extends ConsumerStatefulWidget {
   const FileView({super.key});
 
@@ -18,8 +25,7 @@ class _FileViewState extends ConsumerState<FileView> {
   String currentImagePath = "";
   ImageInfo? currentImageInfo;
   double zoomScale = 1.0;
-  final TransformationController transformationController =
-      TransformationController();
+  final TransformationController transformationController = TransformationController();
 
   _setSelectedBoxIndex(int? index) {
     ref.read(selectedBoxProvider.notifier).update(
@@ -31,15 +37,13 @@ class _FileViewState extends ConsumerState<FileView> {
   Widget build(BuildContext context) {
     final selectedFile = ref.watch(fileProvider);
     final selectedBoxIndex = ref.watch(selectedBoxProvider);
-    final image =
-        selectedFile != null ? Image.file(File(selectedFile.path)) : null;
+    final image = selectedFile != null ? Image.file(File(selectedFile.path)) : null;
 
     if (selectedFile?.path != currentImagePath) {
       currentImageInfo = null;
-      image?.image.resolve(const ImageConfiguration()).addListener(
-          ImageStreamListener((image, synchronousCall) => setState(() {
-                currentImageInfo = image;
-              })));
+      image?.image.resolve(const ImageConfiguration()).addListener(ImageStreamListener((image, synchronousCall) => setState(() {
+            currentImageInfo = image;
+          })));
 
       currentImagePath = selectedFile?.path ?? "";
     }
@@ -50,8 +54,7 @@ class _FileViewState extends ConsumerState<FileView> {
             ? const Text("-")
             : InteractiveViewer(
                 maxScale: 5,
-                onInteractionUpdate: (details) => setState(() => zoomScale =
-                    transformationController.value.getMaxScaleOnAxis()),
+                onInteractionUpdate: (details) => setState(() => zoomScale = transformationController.value.getMaxScaleOnAxis()),
                 transformationController: transformationController,
                 child: Center(
                     child: Container(
@@ -59,19 +62,19 @@ class _FileViewState extends ConsumerState<FileView> {
                         child: Stack(children: [
                           image,
                           ...selectedFile.boxes
-                              .mapIndexed((i, b) => FileViewBox(
+                              .mapIndexed((i, b) => _FileViewBoxSelectedInfo(
+                                  FileViewBox(
                                     b,
                                     scale: zoomScale,
-                                    imageHeight: currentImageInfo!.image.height
-                                        .toDouble(),
-                                    imageWidth: currentImageInfo!.image.width
-                                        .toDouble(),
+                                    imageHeight: currentImageInfo!.image.height.toDouble(),
+                                    imageWidth: currentImageInfo!.image.width.toDouble(),
                                     selected: i == selectedBoxIndex,
                                     onSelected: () => _setSelectedBoxIndex(i),
-                                    onBoxUpdated: (box) => ref
-                                        .read(fileProvider.notifier)
-                                        .updateBox(i, box),
-                                  ))
+                                    onBoxUpdated: (box) => ref.read(fileProvider.notifier).updateBox(i, box),
+                                  ),
+                                  i == selectedBoxIndex))
+                              .sorted((a, b) => a.selected ? 1 : (b.selected ? -1 : 0))
+                              .map((i) => i.box)
                         ])))));
   }
 }
