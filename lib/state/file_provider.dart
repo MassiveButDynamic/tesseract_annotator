@@ -9,9 +9,14 @@ class SelectedFile {
   String path;
   List<TessBox> _boxes = [];
   List<TessBox> get boxes => _boxes;
+  final void Function()? onLoaded;
 
-  SelectedFile({required this.path}) {
-    _loadBoxes();
+  SelectedFile({required this.path, this.onLoaded}) {
+    try {
+      _loadBoxes();
+    } catch (error) {
+      print("Error loading boxes: ${error}");
+    }
   }
 
   _loadBoxes() async {
@@ -34,6 +39,10 @@ class SelectedFile {
             w: int.parse(lineSegs[3]),
             h: int.parse(lineSegs[4])));
       }
+    }
+
+    if (onLoaded != null) {
+      onLoaded!();
     }
   }
 
@@ -75,7 +84,7 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
 
   void selectFile(String path) {
     ref.read(selectedBoxProvider.notifier).update((_) => null);
-    state = SelectedFile(path: path);
+    state = SelectedFile(path: path, onLoaded: () => ref.notifyListeners());
   }
 
   void unselectFile() {
