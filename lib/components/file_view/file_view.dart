@@ -61,7 +61,7 @@ class _FileViewState extends ConsumerState<FileView> {
                 child: Center(
                     child: Container(
                         margin: const EdgeInsets.all(20),
-                        child: Stack(children: [
+                        child: Stack(key: UniqueKey(), children: [
                           image,
                           ...selectedFile.boxes
                               .mapIndexed((i, b) => _FileViewBoxSelectedInfo(
