@@ -22,6 +22,21 @@ class _FiletreeState extends ConsumerState<Filetree> {
   TreeController<FileTreeNode>? treeController;
   String currentRootPath = "";
 
+  IconData _getFileIcon(String path) {
+    final ext = extension(path);
+    switch (ext) {
+      case ".jpg":
+      case ".jpeg":
+      case ".png":
+        return Icons.image_outlined;
+
+      case ".box":
+        return Icons.format_shapes_outlined;
+      default:
+        return Icons.description_outlined;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,7 +83,6 @@ class _FiletreeState extends ConsumerState<Filetree> {
     return Ink(
         color: Colors.white,
         child: Container(
-            // color: Colors.white,
             padding: const EdgeInsets.all(15),
             child: Column(
                 mainAxisSize: MainAxisSize.max,
@@ -166,8 +180,10 @@ class _FiletreeState extends ConsumerState<Filetree> {
                                                                 const EdgeInsets
                                                                     .only(
                                                                     right: 5),
-                                                            child: const Icon(Icons
-                                                                .description_outlined))
+                                                            child: Icon(
+                                                                _getFileIcon(
+                                                                    entry.node
+                                                                        .path)))
                                                       ]),
                                                 Flexible(
                                                     child: Text(
