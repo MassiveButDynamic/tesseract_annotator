@@ -31,10 +31,9 @@ class _FiletreeState extends ConsumerState<Filetree> {
   Widget build(BuildContext context) {
     final files = ref.watch(filesProvider);
 
-    if (files != null &&
-        (treeController == null ||
-            files.path != currentRootPath ||
-            onlyShowCompatibleFilesChanged)) {
+    if (files != null) {
+      final previouslyToggledNodes = treeController?.toggledNodes;
+
       treeController = TreeController(
           roots: onlyShowCompatibleFiles
               ? files.children
@@ -50,6 +49,18 @@ class _FiletreeState extends ConsumerState<Filetree> {
           defaultExpansionState: false);
       currentRootPath = files.path;
       onlyShowCompatibleFilesChanged = false;
+
+      if (previouslyToggledNodes != null) {
+        for (final pn in previouslyToggledNodes) {
+          for (final match in treeController!
+              .search((n) => n.path == pn.path)
+              .matches
+              .keys) {
+            treeController!.setExpansionState(match, true);
+            match.loadChildrensChildren();
+          }
+        }
+      }
     }
 
     final selectedFile = ref.watch(fileProvider);
@@ -127,6 +138,9 @@ class _FiletreeState extends ConsumerState<Filetree> {
                                             treeController!
                                                 .toggleExpansion(entry.node);
                                             entry.node.loadChildrensChildren();
+                                            ref
+                                                .read(filesProvider.notifier)
+                                                .listenToFileEvents();
                                           } else if (entry.node
                                               .pathIsCompatibleFile()) {
                                             await ref

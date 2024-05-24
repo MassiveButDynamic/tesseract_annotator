@@ -6,6 +6,7 @@ import 'package:tesseract_annotator/state/selected_directory_provider.dart';
 import 'package:tesseract_annotator/types/filetree_node.dart';
 
 class FilesProviderNotifier extends Notifier<FileTreeNode?> {
+  RecursiveSubscription? fileEventsSubscription;
   @override
   FileTreeNode? build() {
     final path = ref.watch(selectedDirectoryProvider);
@@ -20,7 +21,15 @@ class FilesProviderNotifier extends Notifier<FileTreeNode?> {
             FileSystemEntityType.directory);
     rootNode.loadChildren();
     rootNode.loadChildrensChildren();
+    fileEventsSubscription =
+        rootNode.listenToFileEvents(() => ref.invalidateSelf());
     return rootNode;
+  }
+
+  void listenToFileEvents() {
+    fileEventsSubscription?.cancel();
+    fileEventsSubscription =
+        state?.listenToFileEvents(() => ref.invalidateSelf());
   }
 
   List<FileTreeNode> _getSelectableChildren() {

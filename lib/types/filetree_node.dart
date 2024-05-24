@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:path/path.dart';
 
 class FileTreeNode {
@@ -26,13 +28,19 @@ class FileTreeNode {
     if (File(path).statSync().type == FileSystemEntityType.directory) {
       final children = Directory(path)
           .listSync()
-          .map((e) => FileTreeNode(path: e.path, isDir: File(e.path).statSync().type == FileSystemEntityType.directory, parent: this))
+          .sorted((a, b) => a.path.compareTo(b.path))
+          .map((e) => FileTreeNode(
+              path: e.path,
+              isDir: File(e.path).statSync().type ==
+                  FileSystemEntityType.directory,
+              parent: this))
           .toList();
       children.sort((a, b) {
         if (a.isDir && !b.isDir) return -1;
         if (!a.isDir && b.isDir) return 1;
         return a.getFilename().compareTo(b.getFilename());
       });
+
       return children;
     } else {
       return [];
@@ -48,6 +56,39 @@ class FileTreeNode {
   }
 
   bool pathIsCompatibleFile() {
-    return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
+    return path.endsWith("jpg") ||
+        path.endsWith("jpeg") ||
+        path.endsWith("png");
+  }
+
+  RecursiveSubscription listenToFileEvents(void Function() callback) {
+    final rootSubscription =
+        Directory(path).watch(recursive: true).listen((_) => callback());
+    List<RecursiveSubscription> childSubscriptions = [];
+
+    if (isDir) {
+      for (final child in children) {
+        childSubscriptions.add(child.listenToFileEvents(callback));
+      }
+    }
+
+    return RecursiveSubscription(
+        rootSubscription: rootSubscription,
+        childSubscriptions: childSubscriptions);
+  }
+}
+
+class RecursiveSubscription {
+  final StreamSubscription rootSubscription;
+  final List<RecursiveSubscription> childSubscriptions;
+
+  const RecursiveSubscription(
+      {required this.rootSubscription, required this.childSubscriptions});
+
+  void cancel() {
+    rootSubscription.cancel();
+    for (final child in childSubscriptions) {
+      child.cancel();
+    }
   }
 }
