@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart';
 import 'package:tesseract_annotator/state/selected_box_provider.dart';
@@ -11,16 +13,14 @@ class SelectedFile {
   List<TessBox> get boxes => _boxes;
   final void Function()? onLoaded;
 
-  SelectedFile({required this.path, this.onLoaded}) {
-    try {
-      _loadBoxes();
-    } catch (error) {
-      print("Error loading boxes: ${error}");
-    }
-  }
+  Image? image;
+  ImageInfo? imageInfo;
+
+  SelectedFile({required this.path, this.onLoaded});
 
   _loadBoxes() async {
     if (!_hasBoxFile()) return;
+    if (image == null || imageInfo == null) return;
 
     _boxes = [];
     final lines = await File("${withoutExtension(path)}.box").readAsLines();
@@ -35,9 +35,9 @@ class SelectedFile {
         _boxes.add(TessBox(
             letter: lineSegs[0],
             x: int.parse(lineSegs[1]),
-            y: int.parse(lineSegs[2]),
-            w: int.parse(lineSegs[3]),
-            h: int.parse(lineSegs[4])));
+            y: imageInfo!.image.height - int.parse(lineSegs[4]),
+            w: int.parse(lineSegs[3]) - int.parse(lineSegs[1]),
+            h: int.parse(lineSegs[4]) - int.parse(lineSegs[2])));
       }
     }
 
@@ -56,7 +56,12 @@ class SelectedFile {
   }
 
   Future<void> _saveBoxes() async {
-    await File("${withoutExtension(path)}.box").writeAsString(_boxes.map((b) => "${b.letter} ${b.x} ${b.y} ${b.w} ${b.h} 0").join("\n"));
+    if (image == null || imageInfo == null) return;
+
+    await File("${withoutExtension(path)}.box").writeAsString(_boxes
+        .map((b) =>
+            "${b.letter} ${b.x} ${imageInfo!.image.height - (b.y + b.h)} ${b.x + b.w} ${imageInfo!.image.height - b.y} 0")
+        .join("\n"));
   }
 
   Future<TessBox> addBox({int? x, int? y}) async {
@@ -72,7 +77,27 @@ class SelectedFile {
   }
 
   bool pathIsCompatibleFile() {
-    return path.endsWith("jpg") || path.endsWith("jpeg") || path.endsWith("png");
+    return path.endsWith("jpg") ||
+        path.endsWith("jpeg") ||
+        path.endsWith("png");
+  }
+
+  Future<void> loadImageInfo() async {
+    final newImage = pathIsCompatibleFile() ? Image.file(File(path)) : null;
+
+    final imageInfoCompleter = Completer<ImageInfo>();
+    newImage?.image.resolve(const ImageConfiguration()).addListener(
+        ImageStreamListener(
+            (info, synchronousCall) => imageInfoCompleter.complete(info)));
+
+    imageInfo = await imageInfoCompleter.future;
+    image = newImage;
+
+    try {
+      _loadBoxes();
+    } catch (error) {
+      print("Error loading boxes: $error");
+    }
   }
 }
 
@@ -82,9 +107,12 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
     return null;
   }
 
-  void selectFile(String path) {
+  Future<void> selectFile(String path) async {
     ref.read(selectedBoxProvider.notifier).update((_) => null);
-    state = SelectedFile(path: path, onLoaded: () => ref.notifyListeners());
+    final newFile =
+        SelectedFile(path: path, onLoaded: () => ref.notifyListeners());
+    await newFile.loadImageInfo();
+    state = newFile;
   }
 
   void unselectFile() {
@@ -98,7 +126,9 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
 
   void addBox({int? x, int? y}) async {
     await state?.addBox(x: x, y: y);
-    ref.read(selectedBoxProvider.notifier).update((_) => state != null ? state!.boxes.length - 1 : null);
+    ref
+        .read(selectedBoxProvider.notifier)
+        .update((_) => state != null ? state!.boxes.length - 1 : null);
     ref.notifyListeners();
   }
 
@@ -113,4 +143,5 @@ class FileProviderNotifier extends Notifier<SelectedFile?> {
   }
 }
 
-final fileProvider = NotifierProvider<FileProviderNotifier, SelectedFile?>(FileProviderNotifier.new);
+final fileProvider = NotifierProvider<FileProviderNotifier, SelectedFile?>(
+    FileProviderNotifier.new);

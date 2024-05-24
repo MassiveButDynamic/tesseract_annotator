@@ -38,24 +38,33 @@ class FileViewBox extends StatelessWidget {
               h: result.rect.height.toInt(),
               letter: initialBox.letter));
         },
-        rect: Rect.fromLTWH(initialBox.x.toDouble(), initialBox.y.toDouble(), initialBox.w.toDouble(), initialBox.h.toDouble()),
+        rect: Rect.fromLTWH(initialBox.x.toDouble(), initialBox.y.toDouble(),
+            initialBox.w.toDouble(), initialBox.h.toDouble()),
         contentBuilder: (context, rect, flip) => GestureDetector(
               onTap: () => onSelected(),
               child: Stack(children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: (1 / scale) * 10, vertical: (1 / scale) * 3),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: (1 / scale) * 10, vertical: (1 / scale) * 3),
                   decoration: BoxDecoration(
-                      color: selected ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.primaryFixedDim,
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular((1 / scale) * 3))),
+                      color: selected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).colorScheme.primaryFixedDim,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular((1 / scale) * 3))),
                   child: Text(
                     initialBox.letter,
-                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontSize: (1 / scale) * 14),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontSize: (1 / scale) * 14),
                   ),
                 ),
                 Container(
                     decoration: BoxDecoration(
                         border: Border.all(
-                            color: selected ? Theme.of(context).primaryColor : Theme.of(context).colorScheme.primaryFixedDim,
+                            color: selected
+                                ? Theme.of(context).primaryColor
+                                : Theme.of(context).colorScheme.primaryFixedDim,
                             width: (1 / (scale - (scale - 1.0) / 2)) * 3.0),
                         borderRadius: BorderRadius.circular((1 / scale) * 3)))
               ]),

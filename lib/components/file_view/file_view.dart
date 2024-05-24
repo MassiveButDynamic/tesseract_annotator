@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tesseract_annotator/components/file_view/file_view_box.dart';
@@ -23,9 +21,10 @@ class FileView extends ConsumerStatefulWidget {
 
 class _FileViewState extends ConsumerState<FileView> {
   String currentImagePath = "";
-  ImageInfo? currentImageInfo;
+
   double zoomScale = 1.0;
-  final TransformationController transformationController = TransformationController();
+  TransformationController transformationController =
+      TransformationController();
   Key stackKey = UniqueKey();
 
   _setSelectedBoxIndex(int? index) {
@@ -38,47 +37,55 @@ class _FileViewState extends ConsumerState<FileView> {
   Widget build(BuildContext context) {
     final selectedFile = ref.watch(fileProvider);
     final selectedBoxIndex = ref.watch(selectedBoxProvider);
-    final image = selectedFile != null && selectedFile.pathIsCompatibleFile() ? Image.file(File(selectedFile.path)) : null;
 
+    stackKey = selectedFile != null ? Key(selectedFile.path) : UniqueKey();
     if (selectedFile?.path != currentImagePath) {
-      currentImageInfo = null;
-      image?.image.resolve(const ImageConfiguration()).addListener(ImageStreamListener((image, synchronousCall) => setState(() {
-            currentImageInfo = image;
-          })));
-
+      transformationController = TransformationController();
       currentImagePath = selectedFile?.path ?? "";
-      stackKey = UniqueKey();
     }
 
     return GestureDetector(
         onTap: () => _setSelectedBoxIndex(null),
-        child: selectedFile == null || image == null || currentImageInfo == null
-            ? (selectedFile?.pathIsCompatibleFile() == true
-                ? const Center(child: Text("Datei kann nicht geladen werden"))
-                : const Center(child: Text("Dateityp wird nicht unterstützt")))
-            : InteractiveViewer(
-                maxScale: 5,
-                onInteractionUpdate: (details) => setState(() => zoomScale = transformationController.value.getMaxScaleOnAxis()),
-                transformationController: transformationController,
-                child: Center(
-                    child: Container(
-                        margin: const EdgeInsets.all(20),
-                        child: Stack(key: stackKey, children: [
-                          image,
-                          ...selectedFile.boxes
-                              .mapIndexed((i, b) => _FileViewBoxSelectedInfo(
-                                  FileViewBox(
-                                    b,
-                                    scale: zoomScale,
-                                    imageHeight: currentImageInfo!.image.height.toDouble(),
-                                    imageWidth: currentImageInfo!.image.width.toDouble(),
-                                    selected: i == selectedBoxIndex,
-                                    onSelected: () => _setSelectedBoxIndex(i),
-                                    onBoxUpdated: (box) => ref.read(fileProvider.notifier).updateBox(i, box),
-                                  ),
-                                  i == selectedBoxIndex))
-                              .sorted((a, b) => a.selected ? 1 : (b.selected ? -1 : 0))
-                              .map((i) => i.box)
-                        ])))));
+        child: selectedFile == null
+            ? const Center(child: Text("Keine Datei ausgewählt"))
+            : (selectedFile.image != null && selectedFile.imageInfo != null
+                ? InteractiveViewer(
+                    minScale: 0.002,
+                    maxScale: 5,
+                    boundaryMargin: const EdgeInsets.all(1000),
+                    constrained: false,
+                    onInteractionUpdate: (details) => setState(() => zoomScale =
+                        transformationController.value.getMaxScaleOnAxis()),
+                    transformationController: transformationController,
+                    child: Center(
+                        child: Container(
+                            margin: const EdgeInsets.all(20),
+                            child: Stack(key: stackKey, children: [
+                              selectedFile.image!,
+                              ...selectedFile.boxes
+                                  .mapIndexed(
+                                      (i, b) => _FileViewBoxSelectedInfo(
+                                          FileViewBox(
+                                            b,
+                                            scale: zoomScale,
+                                            imageHeight: selectedFile
+                                                .imageInfo!.image.height
+                                                .toDouble(),
+                                            imageWidth: selectedFile
+                                                .imageInfo!.image.width
+                                                .toDouble(),
+                                            selected: i == selectedBoxIndex,
+                                            onSelected: () =>
+                                                _setSelectedBoxIndex(i),
+                                            onBoxUpdated: (box) => ref
+                                                .read(fileProvider.notifier)
+                                                .updateBox(i, box),
+                                          ),
+                                          i == selectedBoxIndex))
+                                  .sorted((a, b) =>
+                                      a.selected ? 1 : (b.selected ? -1 : 0))
+                                  .map((i) => i.box)
+                            ]))))
+                : const Center(child: CircularProgressIndicator())));
   }
 }

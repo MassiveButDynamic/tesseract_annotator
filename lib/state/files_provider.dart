@@ -14,14 +14,19 @@ class FilesProviderNotifier extends Notifier<FileTreeNode?> {
       return null;
     }
 
-    final rootNode = FileTreeNode(path: path.value!, isDir: File(path.value!).statSync().type == FileSystemEntityType.directory);
+    final rootNode = FileTreeNode(
+        path: path.value!,
+        isDir: File(path.value!).statSync().type ==
+            FileSystemEntityType.directory);
     rootNode.loadChildren();
     rootNode.loadChildrensChildren();
     return rootNode;
   }
 
   List<FileTreeNode> _getSelectableChildren() {
-    return state == null ? [] : state!.children.where((c) => c.pathIsCompatibleFile()).toList();
+    return state == null
+        ? []
+        : state!.children.where((c) => c.pathIsCompatibleFile()).toList();
   }
 
   int? _findCurrentIndex(List<FileTreeNode> selectableChildren) {
@@ -31,23 +36,28 @@ class FilesProviderNotifier extends Notifier<FileTreeNode?> {
     return selectableChildren.indexWhere((n) => n.path == selectedFile.path);
   }
 
-  void next() {
+  Future<void> next() async {
     final selectableChildren = _getSelectableChildren();
     final currentIndex = _findCurrentIndex(selectableChildren);
     if (currentIndex == null) return;
 
-    if (currentIndex >= selectableChildren.length) return;
-    ref.read(fileProvider.notifier).selectFile(selectableChildren[currentIndex + 1].path);
+    if (currentIndex >= selectableChildren.length - 1) return;
+    await ref
+        .read(fileProvider.notifier)
+        .selectFile(selectableChildren[currentIndex + 1].path);
   }
 
-  void back() {
+  Future<void> back() async {
     final selectableChildren = _getSelectableChildren();
     final currentIndex = _findCurrentIndex(selectableChildren);
     if (currentIndex == null) return;
 
     if (currentIndex <= 0) return;
-    ref.read(fileProvider.notifier).selectFile(selectableChildren[currentIndex - 1].path);
+    await ref
+        .read(fileProvider.notifier)
+        .selectFile(selectableChildren[currentIndex - 1].path);
   }
 }
 
-final filesProvider = NotifierProvider<FilesProviderNotifier, FileTreeNode?>(FilesProviderNotifier.new);
+final filesProvider = NotifierProvider<FilesProviderNotifier, FileTreeNode?>(
+    FilesProviderNotifier.new);
